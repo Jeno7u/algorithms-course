@@ -86,38 +86,6 @@ public:
             }
         }
     }
-
-    void mergeHeaps(BinaryHeap other){
-        vector<int> heap2 = other.heap;
-        sort(heap.begin(), heap.end(), greater<>());
-        sort(heap2.begin(), heap2.end(), greater<>());
-
-        vector<int> mergeHeap;
-        int l = 0;
-        int l2 = 0;
-
-        while(l < heap.size() || l2 < heap2.size()){
-            if (l < heap.size() && l2 < heap2.size() && heap[l] > heap2[l2]){
-                mergeHeap.push_back(heap[l]);
-                l++;
-            }
-            else if (l < heap.size() && l2 < heap2.size() && heap[l] < heap2[l2]){
-                mergeHeap.push_back(heap2[l2]);
-                l2++;
-            }
-            else if (l >= heap.size()){
-                mergeHeap.push_back(heap2[l2]);
-                l2++;
-            }
-            else{
-                mergeHeap.push_back(heap[l]);
-                l++;
-            }
-        }
-
-        heap = mergeHeap;
-    }
-
 };
 
 int main() {
@@ -132,10 +100,5 @@ int main() {
     cout << "\nAdding elemnt 16..." << endl;
     heap.insert(16);
     heap.printHeap(); 
-
-    BinaryHeap heap2 = {30, 18, 6, 3, 2};
-    cout << "\nMerging heap with heap{30, 18, 6, 3, 2}..." << endl;
-    heap.mergeHeaps(heap2);
-    heap.printHeap();
     return 0;
 }
