@@ -40,12 +40,19 @@ void insert(Node*& root, unsigned int value){
     }
 }
 
+void deleteTree(Node*& root){
+    if (root){
+        deleteTree(root->left);
+        deleteTree(root->right);
+        delete root;
+        root = nullptr;
+    }
+}
+
 void printTree(Node* root, int depth = 0, char prefix = ' ') {
     if (root != nullptr) {
         printTree(root->right, depth + 1, '/');
-        
         cout << setw(depth * 6) << prefix << root->data << "(" << root->balance << ")" << endl;
-        
         printTree(root->left, depth + 1, '\\');
     }
 }
@@ -63,5 +70,8 @@ int main(){
     insert(root, 42);
 
     setBalance(root);
+    printTree(root);
+
+    deleteTree(root);
     printTree(root);
 }
