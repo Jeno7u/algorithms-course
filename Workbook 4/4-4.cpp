@@ -1,8 +1,9 @@
 #include <iostream>
+#include <locale>
 #include <string>
 #include <queue>
 #include <unordered_map>
-#include <bitset>
+#include <iomanip>
 using namespace std;
 
 // Структура узла дерева Хаффмана
@@ -22,24 +23,29 @@ struct Compare {
 };
 
 unordered_map<char, string> huffmanCodes;
-unordered_map<char, int> freq;
+unordered_map<char, int> freq; // частоты букв
 
-void buildFrequencyTable(const string& text) {
+void buildFrequencyTable(const wstring& text) {
     for (char ch : text) {
         freq[ch]++;
     }
 }
 
 HuffmanNode* buildHuffmanTree() {
-    priority_queue<HuffmanNode*, vector<HuffmanNode*>, Compare> pq;
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, Compare> pq; // min-heap
     
+    // создаем ноды и закидывем в pq
     for (auto pair : freq) {
         pq.push(new HuffmanNode(pair.first, pair.second));
     }
     
+    // создаем дерево хаффмана (создаем новый нод  из двух нодов с min freq и повторяем)
     while (pq.size() != 1) {
-        HuffmanNode* left = pq.top(); pq.pop();
-        HuffmanNode* right = pq.top(); pq.pop();
+        HuffmanNode* left = pq.top(); 
+        pq.pop();
+        
+        HuffmanNode* right = pq.top(); 
+        pq.pop();
         
         HuffmanNode* newNode = new HuffmanNode('\0', left->freq + right->freq);
         newNode->left = left;
@@ -61,7 +67,7 @@ void generateCodes(HuffmanNode* root, string code) {
     generateCodes(root->right, code + "1");
 }
 
-string compress(const string& text) {
+string compress(const wstring& text) {
     string compressed = "";
     for (char ch : text) {
         compressed += huffmanCodes[ch];
@@ -70,9 +76,10 @@ string compress(const string& text) {
 }
 
 string decompress(HuffmanNode* root, const string& compressed) {
-    string decompressed = "";
+    wstring decompressed = "";
     HuffmanNode* current = root;
     
+    // идем по дереву и ищем буквы наши
     for (char bit : compressed) {
         if (bit == '0') {
             current = current->left;
@@ -89,29 +96,44 @@ string decompress(HuffmanNode* root, const string& compressed) {
     return decompressed;
 }
 
-double compressionRatio(const string& original, const string& compressed) {
+double compressionRatio(const wstring& original, const wstring& compressed) {
     double originalBits = original.length() * 8.0;
     double compressedBits = compressed.length();
     return (originalBits - compressedBits) / originalBits * 100.0;
 }
 
-void printTree(HuffmanNode* root, string indent = "") {
-    if (!root) return;
+// void printTree(HuffmanNode* root, string indent = "") {
+//     if (!root) return;
     
-    if (root->ch != '\0') {
-        cout << indent << root->ch << " (" << (double)root->freq/freq[root->ch] << ")" << endl;
-    } else {
-        cout << indent << "* (" << (double)root->freq/freq.begin()->second << ")" << endl;
+//     if (root->ch != '\0') {
+//         cout << indent << root->ch << " (" << (double)root->freq/freq[root->ch] << ")" << endl;
+//     } else {
+//         cout << indent << "* (" << (double)root->freq/freq.begin()->second << ")" << endl;
+//     }
+    
+//     printTree(root->left, indent + "  ");
+//     printTree(root->right, indent + "  ");
+// }
+
+void printTree(HuffmanNode* root, int depth = 0, char prefix = ' ') {
+    if (root != nullptr) {
+        printTree(root->right, depth + 1, '/');
+        if (root->ch == '\0')
+            cout << setw(depth * 6) << prefix << "(" << ")" << endl;
+        else
+            cout << setw(depth * 6) << prefix << root->ch << "(" << ")" << endl;
+        printTree(root->left, depth + 1, '\\');
     }
-    
-    printTree(root->left, indent + "  ");
-    printTree(root->right, indent + "  ");
 }
 
 int main() {
-    string text;
+    locale::global(locale("en_US.UTF-8"));
+    wcin.imbue(locale());
+    wcout.imbue(locale());
+
+    wstring text;
     cout << "Введите текст, содержащий не менее двух символов: ";
-    getline(cin, text);
+    getline(wcin, text);
     
     if (text.length() < 2) {
         cout << "Текст должен содержать не менее двух символов!" << endl;
@@ -122,7 +144,7 @@ int main() {
     
     cout << "\nПолученный список частот:\n";
     for (auto pair : freq) {
-        cout << pair.first << " (" << (double)pair.second/text.length() << ") ";
+        cout << pair.first << " (" << pair.second << ") ";
     }
     
     HuffmanNode* root = buildHuffmanTree();
